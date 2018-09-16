@@ -1,10 +1,13 @@
 library(dplyr)
 library(zoo)
 
+
+setwd('C:\\Users\\onyxs\\OneDrive\\Documents\\R\\Shiny_SP500_Dashboard-master\\data')
+
 # Load stock, sector information and indicators
-cf = read.csv('./data/con_f.csv', stringsAsFactors = F)
-con_cf = read.csv('./data/con.csv', stringsAsFactors = F)
-stocks = read.csv('./data/all_stocks_1yr.csv', stringsAsFactors = F)
+cf = read.csv('con_f.csv', stringsAsFactors = F)
+#con_cf = read.csv('./data/con.csv', stringsAsFactors = F)
+stocks = read.csv('all_stocks_1yr.csv', stringsAsFactors = F)
 
 # Load sector data
 a = "XLY,XLP,XLE,XLF,XLV,XLI,XLB,XLRE,XLK,XLU,VOX"
@@ -17,14 +20,26 @@ av_api = function(symble, itv = 'TIME_SERIES_DAILY', opz = 'compact') {
   d = '&apikey=RJZ9H4BTXR3YW06Q&datatype=csv'
   api = paste0(c(http, itv, b, symble, c, opz, d), collapse = '')
   av = read.csv(api)
+  #print(api)
   return(av)
 }
 
-sector_list = lapply(b, function(x) av_api(x))
-sector_name = rep(b, rep(100, 11))
-sector_data = do.call(rbind, sector_list)
-sector_data$name = sector_name
-write.csv(sector_data, file = './data/sector_data.csv',row.names = F)
+i = 1
+sector_data= vector(length=0)
+for(i in 1:length(b)){
+  print(paste(i,b[i]))
+  
+  data11 = matrix(data = c(1,1,1,1),nrow=2,ncol=2)
+  while(dim(data11)[1]!=100 & dim(data11)[2]!=6){
+    
+    data11 = av_api(b[i])
+  }
+  data11$name = b[i]
+  sector_data = rbind(data11,sector_data)
+  rm(data11)
+}
+
+write.csv(sector_data, file = 'sector_data.csv',row.names = F)
 
 # Make stocks with Sector
 temp = con_cf %>% 
